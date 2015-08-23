@@ -40,28 +40,30 @@
     uint8_t hashbuf[dkLen];
     self.callbackId = command.callbackId;
 
-    @try {
-        success = libscrypt_scrypt((uint8_t *)passphrase, strlen(passphrase), parsedSalt, saltLength, N, r, p, hashbuf, dkLen);
-    }
-    @catch (NSException * e) {
-        [self failWithMessage: [NSString stringWithFormat:@"%@", e] withError: nil];
-    }
+    [self.commandDelegate runInBackground:^{
+        @try {
+            success = libscrypt_scrypt((uint8_t *)passphrase, strlen(passphrase), parsedSalt, saltLength, N, r, p, hashbuf, dkLen);
+        }
+        @catch (NSException * e) {
+            [self failWithMessage: [NSString stringWithFormat:@"%@", e] withError: nil];
+        }
 
-    if (success!=0) {
-        [self failWithMessage: @"Failure in scrypt" withError: nil];
-    }
+        if (success!=0) {
+            [self failWithMessage: @"Failure in scrypt" withError: nil];
+        }
 
 
-    // Hexify
-    NSMutableString *hexResult = [NSMutableString stringWithCapacity:dkLen * 2];
-    for(i = 0;i < dkLen; i++ )
-    {
-        [hexResult appendFormat:@"%02x", hashbuf[i]];
-    }
-    NSString *result = [NSString stringWithString: hexResult];
-    [self successWithMessage: result];
+        // Hexify
+        NSMutableString *hexResult = [NSMutableString stringWithCapacity:dkLen * 2];
+        for(i = 0;i < dkLen; i++ )
+        {
+            [hexResult appendFormat:@"%02x", hashbuf[i]];
+        }
+        NSString *result = [NSString stringWithString: hexResult];
+        [self successWithMessage: result];
 
-    free(buffer);
+        free(buffer);
+    }];
 }
 
 -(void)successWithMessage:(NSString *)message
