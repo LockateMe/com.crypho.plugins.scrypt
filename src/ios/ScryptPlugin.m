@@ -9,38 +9,37 @@
 
 - (void)scrypt:(CDVInvokedUrlCommand*)command
 {
-
-    int i, success;
-    size_t saltLength;
-    const uint8_t *parsedSalt;
-    uint8_t *buffer = NULL;
-    const char* passphrase = [[command argumentAtIndex:0] UTF8String];
-    id salt = [command argumentAtIndex:1];
-
-    if ([salt isKindOfClass:[NSString class]]) {
-        parsedSalt = (const uint8_t *)[salt UTF8String];
-        saltLength = (size_t) [salt length];
-    } else if ([salt isKindOfClass:[NSArray class]]) {
-        saltLength = (int) [salt count];
-        buffer = malloc(sizeof(uint8_t) * saltLength);
-
-        for (i = 0; i < saltLength; ++i) {
-            buffer[i] = (uint8_t)[[salt objectAtIndex:i] integerValue];
-        }
-        parsedSalt = buffer;
-    }
-
-    // Parse options
-    NSMutableDictionary* options = [command.arguments objectAtIndex:2];
-    uint64_t N = [options[@"N"] unsignedLongValue] ?: SCRYPT_N;
-    uint32_t r = [options[@"r"] unsignedShortValue] ?: SCRYPT_r;
-    uint32_t p = [options[@"p"] unsignedShortValue] ?: SCRYPT_p;
-    uint32_t dkLen = [options[@"dkLen"] unsignedShortValue] ?: 32;
-
-    uint8_t hashbuf[dkLen];
-    self.callbackId = command.callbackId;
-
     [self.commandDelegate runInBackground:^{
+        int i, success;
+        size_t saltLength;
+        const uint8_t *parsedSalt;
+        uint8_t *buffer = NULL;
+        const char* passphrase = [[command argumentAtIndex:0] UTF8String];
+        id salt = [command argumentAtIndex:1];
+
+        if ([salt isKindOfClass:[NSString class]]) {
+            parsedSalt = (const uint8_t *)[salt UTF8String];
+            saltLength = (size_t) [salt length];
+        } else if ([salt isKindOfClass:[NSArray class]]) {
+            saltLength = (int) [salt count];
+            buffer = malloc(sizeof(uint8_t) * saltLength);
+
+            for (i = 0; i < saltLength; ++i) {
+                buffer[i] = (uint8_t)[[salt objectAtIndex:i] integerValue];
+            }
+            parsedSalt = buffer;
+        }
+
+        // Parse options
+        NSMutableDictionary* options = [command.arguments objectAtIndex:2];
+        uint64_t N = [options[@"N"] unsignedLongValue] ?: SCRYPT_N;
+        uint32_t r = [options[@"r"] unsignedShortValue] ?: SCRYPT_r;
+        uint32_t p = [options[@"p"] unsignedShortValue] ?: SCRYPT_p;
+        uint32_t dkLen = [options[@"dkLen"] unsignedShortValue] ?: 32;
+
+        uint8_t hashbuf[dkLen];
+        self.callbackId = command.callbackId;
+        
         @try {
             success = libscrypt_scrypt((uint8_t *)passphrase, strlen(passphrase), parsedSalt, saltLength, N, r, p, hashbuf, dkLen);
         }
