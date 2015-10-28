@@ -59,7 +59,7 @@
         </config-file>
 
         <config-file target="AndroidManifest.xml" parent="/manifest">
-            <uses-sdk   android:minSdkVersion="19" android:targetSdkVersion="19"/>
+            <uses-sdk   android:minSdkVersion="14" android:targetSdkVersion="14"/>
         </config-file>
 
         <source-file src="src/android/com/crypho/plugins/ScryptPlugin.java" target-dir="src/com/crypho/plugins/"/>
